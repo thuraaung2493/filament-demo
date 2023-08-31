@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => view('welcome'));
+
+Route::redirect('/login', '/admin/login', 301)->name('login');
+
+// Fix [login] route not defined
+Route::get('/login', fn () => redirect()->route('filament.admin.auth.login'))->name('login');

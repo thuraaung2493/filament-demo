@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasNavigationBadge;
+use App\Filament\Enums\PatientType;
 use App\Filament\Resources\PatientResource\Pages;
 use App\Filament\Resources\PatientResource\RelationManagers\TreatmentsRelationManager;
 use App\Models\Patient;
@@ -15,11 +19,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class PatientResource extends Resource
+final class PatientResource extends Resource
 {
+    use HasNavigationBadge;
+
     protected static ?string $model = Patient::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationGroup = 'Resources';
+    // protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    // protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -30,11 +40,7 @@ class PatientResource extends Resource
                     ->maxLength(255),
 
                 Select::make('type')
-                    ->options([
-                        'cat' => 'Cat',
-                        'dog' => 'Dog',
-                        'rabbit' => 'Rabbit',
-                    ])
+                    ->options(PatientType::class)
                     ->required(),
 
                 DatePicker::make('date_of_birth')
@@ -69,10 +75,12 @@ class PatientResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('#')->rowIndex(),
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('type'),
                 TextColumn::make('date_of_birth')->sortable(),
-                TextColumn::make('owner.name')->searchable(),
+                TextColumn::make('owner.name')->label('Owner Name')->searchable(),
+                TextColumn::make('owner.email')->label('Owner Email')->searchable(),
             ])
             ->filters([
                 SelectFilter::make('type')

@@ -1,19 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\PatientResource\RelationManagers;
 
-use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
 
-class TreatmentsRelationManager extends RelationManager
+final class TreatmentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'treatments';
 
@@ -53,7 +52,7 @@ class TreatmentsRelationManager extends RelationManager
                     ->dateTime(),
             ])
             ->filters([
-                //
+
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

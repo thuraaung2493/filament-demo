@@ -1,16 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Admin extends Authenticatable implements FilamentUser
+final class Admin extends Authenticatable implements FilamentUser
 {
     use HasFactory;
+    use HasRoles;
     use Notifiable;
 
     /**
@@ -41,10 +45,16 @@ class Admin extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
     public function canAccessPanel(Panel $panel): bool
     {
         return true;
+    }
+
+    protected function getDefaultGuardName(): string
+    {
+        return 'admin';
     }
 }

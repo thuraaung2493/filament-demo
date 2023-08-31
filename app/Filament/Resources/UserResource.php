@@ -1,23 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasNavigationBadge;
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+final class UserResource extends Resource
 {
+    use HasNavigationBadge;
+
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Resources';
+    // protected static ?string $navigationIcon = 'heroicon-o-users';
+    // protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -34,16 +41,19 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('#')->rowIndex(),
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
             ])
             ->filters([
-                Tables\Filters\Filter::make('verified')
-                    ->query(fn (Builder $q): Builder => $q->whereNotNull('email_verified_at')),
+                Tables\Filters\TernaryFilter::make('email_verified_at')
+                    ->label('Email Verified')
+                    ->nullable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -57,9 +67,16 @@ class UserResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            Infolists\Components\TextEntry::make('name'),
+            Infolists\Components\TextEntry::make('email'),
+            Infolists\Components\TextEntry::make('created_at')->label('Created'),
+        ]);
     }
 
     public static function getPages(): array
@@ -67,6 +84,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
+            'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }

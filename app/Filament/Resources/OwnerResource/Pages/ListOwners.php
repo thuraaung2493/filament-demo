@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\OwnerResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 
-class ManageOwners extends ManageRecords
+final class ListOwners extends ListRecords
 {
     protected static string $resource = OwnerResource::class;
 
