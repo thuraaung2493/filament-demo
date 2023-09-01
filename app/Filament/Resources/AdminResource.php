@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Hash;
 
 final class AdminResource extends Resource
 {
@@ -36,7 +37,10 @@ final class AdminResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->required(fn (string $context): bool => 'create' === $context)
+                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                    ->dehydrated(fn (?string $state): bool => \filled($state)),
                 Forms\Components\Select::make('roles')
                     ->required()
                     ->relationship(name: 'roles', titleAttribute: 'name')
@@ -46,7 +50,13 @@ final class AdminResource extends Resource
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->required()
-                            ->maxLength(255)
+                            ->maxLength(255),
+                        Forms\Components\Select::make('permissions')
+                            ->relationship(name: 'permissions', titleAttribute: 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->required()
                     ])
             ]);
     }

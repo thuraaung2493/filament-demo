@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 
 use function Pest\Livewire\livewire;
-
-use function Pest\Laravel\{actingAs, assertDatabaseCount, assertModelMissing, get};
+use function Pest\Laravel\{actingAs, assertDatabaseCount, assertModelExists, get};
 
 describe('Authenticated user with superadmin role', function (): void {
 
@@ -79,7 +78,7 @@ describe('Authenticated user with superadmin role', function (): void {
             ->assertTableColumnFormattedStateNotSet('created_at', $userCreated, record: $user);
     });
 
-    it('can filter users by `verified`', function () {
+    it('can filter users by `verified`', function (): void {
         $users = $this->users;
 
         livewire(UserResource\Pages\ListUsers::class)
@@ -114,7 +113,8 @@ describe('Authenticated user with superadmin role', function (): void {
         livewire(UserResource\Pages\EditUser::class, ['record' => $user->id])
             ->callAction(DeleteAction::class, ['id' => $user->getRouteKey()]);
 
-        assertModelMissing($user);
+        assertModelExists($user);
+        expect($user->refresh())->deleted_at->not->toBeNull();
     });
 
     test('can bulk delete users', function (): void {
@@ -123,7 +123,10 @@ describe('Authenticated user with superadmin role', function (): void {
         livewire(UserResource\Pages\ListUsers::class)
             ->callTableBulkAction(DeleteBulkAction::class, $users);
 
-        assertDatabaseCount('users', 0);
+        assertDatabaseCount('users', $users->count());
+        foreach ($users as $user) {
+            expect($user->refresh())->deleted_at->not->toBeNull();
+        }
     });
 
     test('can edit users', function (): void {

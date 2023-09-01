@@ -20,12 +20,12 @@ final class EditAdmin extends EditRecord
         ];
     }
 
-    protected function handleRecordUpdate(Model $record, array $data): Model
-    {
-        $record->update(\collect($data)->whereNotNull()->toArray());
+    // protected function handleRecordUpdate(Model $record, array $data): Model
+    // {
+    //     $record->update(\collect($data)->whereNotNull()->toArray());
 
-        return $record;
-    }
+    //     return $record;
+    // }
 
     protected function getRedirectUrl(): string
     {

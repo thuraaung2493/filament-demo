@@ -15,10 +15,11 @@ final class PermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            'admins:view-any', 'admins:create', 'admins:update', 'admins:delete',
             'roles:view-any', 'roles:create', 'roles:update', 'roles:delete',
-            'users:view-any', 'users:view', 'users:create', 'users:update', 'users:delete',
             'owners:view-any', 'owners:create', 'owners:update', 'owners:delete',
             'patients:view-any', 'patients:create', 'patients:update', 'patients:delete',
+            'users:view-any', 'users:view', 'users:update', 'users:delete', 'users:force-delete', 'users:restore',
         ];
 
         DB::table('permissions')->insertOrIgnore(\collect($permissions)->map(function ($permission) {

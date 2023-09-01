@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
+use Filament\Forms;
+use App\Models\User;
+use Filament\Tables;
+use Filament\Infolists;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Actions\ActionGroup;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Concerns\HasNavigationBadge;
 use App\Filament\Resources\UserResource\Pages;
-use App\Models\User;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Infolists\Infolist;
-use Filament\Infolists;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 final class UserResource extends Resource
 {
@@ -41,27 +45,60 @@ final class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('#')->rowIndex(),
+                // Tables\Columns\TextColumn::make('#')->rowIndex(),
+                Tables\Columns\TextColumn::make('#')->state(
+                    static function (HasTable $livewire, $rowLoop): string {
+                        if ($livewire->getTableRecordsPerPage() === 'all') {
+                            return \strval($rowLoop->iteration + 1);
+                        }
+                        return (string) ($rowLoop->iteration +
+                            ($livewire->getTableRecordsPerPage() * ($livewire->getTablePage() - 1
+                            ))
+                        );
+                    }
+                ),
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->date()->sortable(),
+                Tables\Columns\TextColumn::make('deleted_at')
+                    ->formatStateUsing(fn ($state) => $state instanceof Carbon ? $state->format('M j, Y') : $state)
+                    ->default('-')
+                    ->sortable(),
             ])
             ->filters([
+                Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\TernaryFilter::make('email_verified_at')
                     ->label('Email Verified')
                     ->nullable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make()
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\ForceDeleteAction::make(),
+                    Tables\Actions\RestoreAction::make(),
+                ])
+                    ->button()
+                    ->label('Actions'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
+            ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
             ]);
     }
 

@@ -39,4 +39,11 @@ final class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function deleted()
+    {
+        return $this->state(fn (array $attributes) => [
+            'deleted_at' => \now(),
+        ]);
+    }
 }

@@ -40,7 +40,6 @@ final class RoleResource extends Resource
                     ->preload()
                     ->searchable()
                     ->columnSpanFull()
-                    ->required()
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->required()
@@ -64,6 +63,8 @@ final class RoleResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->hidden(fn (Role $record) => 'Super Admin' === $record->name)
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
