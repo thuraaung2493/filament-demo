@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasNavigationBadge;
+use Filament\Tables;
+use App\Models\Patient;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use App\Filament\Enums\PatientType;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Concerns\HasNavigationBadge;
 use App\Filament\Resources\PatientResource\Pages;
 use App\Filament\Resources\PatientResource\RelationManagers\TreatmentsRelationManager;
-use App\Models\Patient;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 
 final class PatientResource extends Resource
 {
@@ -38,6 +39,12 @@ final class PatientResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+
+                Repeater::make('members')
+                    ->schema([
+                        TextInput::make('name')->required(),
+                        // ...
+                    ])->addActionLabel('Add member')->collapsible(),
 
                 Select::make('type')
                     ->options(PatientType::class)

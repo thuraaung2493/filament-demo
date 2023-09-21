@@ -22,4 +22,9 @@ final class Patient extends Model
     {
         return $this->hasMany(Treatment::class);
     }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

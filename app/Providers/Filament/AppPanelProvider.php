@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Providers\Filament;
 
 use Filament\Pages;
@@ -10,9 +8,10 @@ use App\Models\Team;
 use Filament\Widgets;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
+use App\Filament\App\Pages\Tenancy\RegisterTeam;
+use App\Filament\App\Pages\Tenancy\EditTeamProfile;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -22,45 +21,32 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
-final class AdminPanelProvider extends PanelProvider
+class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->registration()
-            ->profile()
+            ->tenant(
+                model: Team::class,
+                ownershipRelationship: 'owner',
+                slugAttribute: 'slug',
+            )
+            ->tenantRegistration(RegisterTeam::class)
+            ->tenantProfile(EditTeamProfile::class)
+            ->id('app')
+            ->path('app')
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::Amber,
             ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Admin Management')
-                    ->icon('heroicon-o-shield-check'),
-                NavigationGroup::make()
-                    ->label('Resources')
-                    ->icon('heroicon-o-rectangle-stack')
-                    ->collapsible(false),
-                NavigationGroup::make()
-                    ->label('Settings')
-                    ->icon('heroicon-o-cog-6-tooth')
-
-            ])
-            // ->sidebarFullyCollapsibleOnDesktop(false)
-            // ->topNavigation()
-            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
+            ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\\Filament\\App\\Widgets')
             ->widgets([
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
+                Widgets\AccountWidget::class,
+                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

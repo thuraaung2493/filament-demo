@@ -9,10 +9,12 @@ use App\Filament\Resources\AdminResource\Pages;
 use App\Models\Admin;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Phpsa\FilamentPasswordReveal\Password;
 
 final class AdminResource extends Resource
 {
@@ -35,12 +37,17 @@ final class AdminResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('password')
+                Password::make('password')
                     ->password()
+                    ->same('passwordConfirmation')
                     ->maxLength(255)
-                    ->required(fn (string $context): bool => 'create' === $context)
+                    ->required(fn (string $operation): bool => 'create' === $operation)
                     ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                     ->dehydrated(fn (?string $state): bool => \filled($state)),
+                Password::make('passwordConfirmation')
+                    ->password()
+                    ->required(fn (Get $get): bool => \filled($get('password')))
+                    ->dehydrated(\false),
                 Forms\Components\Select::make('roles')
                     ->required()
                     ->relationship(name: 'roles', titleAttribute: 'name')
